@@ -1,0 +1,17 @@
+# Maven build output
+target/
+*.class
+
+# IntelliJ
+.idea/
+*.iml
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Environment
+.env
