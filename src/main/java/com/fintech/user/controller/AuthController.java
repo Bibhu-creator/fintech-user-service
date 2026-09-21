@@ -2,8 +2,10 @@ package com.fintech.user.controller;
 
 
 import com.fintech.common.response.ApiResponse;
+import com.fintech.user.dto.request.LoginRequest;
 import com.fintech.user.dto.request.RegisterRequest;
 import com.fintech.user.dto.response.UserResponse;
+import com.fintech.user.security.AuthResponse;
 import com.fintech.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,4 +35,16 @@ public class AuthController {
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response));
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request){
+
+        log.info("Login request received for email: {}",  request.getEmail());
+        AuthResponse login = userService.login(request);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(login));
+    }
+
 }
