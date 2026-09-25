@@ -1,0 +1,16 @@
+meta {
+  name: Reject KYC Document
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/kyc/{{documentId}}/reject?adminUserId=1&reason=Document is blurry
+  body: none
+  auth: none
+}
+
+params:query {
+  adminUserId: 1
+  reason: Document is blurry
+}

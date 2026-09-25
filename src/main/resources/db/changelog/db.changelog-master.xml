@@ -9,5 +9,6 @@
              relativeToChangelogFile="true"/>
     <include file="v2__create_roles.sql"
              relativeToChangelogFile="true"/>
-
+    <include file="v3__create_kyc.sql"
+             relativeToChangelogFile="true"/>
 </databaseChangeLog>
