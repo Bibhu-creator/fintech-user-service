@@ -1,0 +1,15 @@
+meta {
+  name: Verify KYC Document
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/v1/kyc/{{documentId}}/verify?adminUserId=1
+  body: none
+  auth: none
+}
+
+params:query {
+  adminUserId: 1
+}
