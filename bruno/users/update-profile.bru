@@ -1,0 +1,19 @@
+meta {
+  name: Update Profile
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/v1/users/profile?userId=3
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "firstName": "Bibhu",
+    "lastName": "Updated",
+    "phoneNumber": "9876583210"
+  }
+}
