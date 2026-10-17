@@ -1,10 +1,12 @@
 package com.fintech.user.service.impl;
 
 import com.fintech.user.domain.User;
+import com.fintech.user.domain.UserStatus;
 import com.fintech.user.dto.request.ChangePasswordRequest;
 import com.fintech.user.dto.request.LoginRequest;
 import com.fintech.user.dto.request.RegisterRequest;
 import com.fintech.user.dto.request.UpdateProfileRequest;
+import com.fintech.user.dto.response.UserPageResponse;
 import com.fintech.user.dto.response.UserResponse;
 import com.fintech.user.exception.InvalidCredentialsException;
 import com.fintech.user.exception.UserAlreadyExistsException;
@@ -15,9 +17,15 @@ import com.fintech.user.security.JwtService;
 import com.fintech.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -158,7 +166,86 @@ public class UserServiceImpl implements UserService {
 
         log.info("Password changed for user: {}", userId);
     }
+    @Override
+    public UserPageResponse getAllUsers(int page, int size,
+                                        UserStatus status) {
+        Pageable pageable = PageRequest.of(page, size);
 
+        Page<User> userPage;
+        if (status != null) {
+            userPage = userRepository
+                    .findAllByStatusOrderByCreatedAtDesc(status, pageable);
+        } else {
+            userPage = userRepository
+                    .findAllByOrderByCreatedAtDesc(pageable);
+        }
+
+        List<UserResponse> users = userPage.getContent()
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+        return UserPageResponse.builder()
+                .users(users)
+                .totalElements(userPage.getTotalElements())
+                .totalPages(userPage.getTotalPages())
+                .currentPage(userPage.getNumber())
+                .pageSize(userPage.getSize())
+                .hasNext(userPage.hasNext())
+                .hasPrevious(userPage.hasPrevious())
+                .build();
+    }
+
+    @Override
+    public UserResponse getUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.notFound(userId));
+        return mapToResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse suspendUser(Long userId, Long adminUserId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.notFound(userId));
+
+        user.suspend();
+        User saved = userRepository.save(user);
+
+        log.info("User {} suspended by admin {}", userId, adminUserId);
+        return mapToResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse activateUser(Long userId, Long adminUserId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.notFound(userId));
+
+        // Only SUSPENDED users can be re-activated by admin
+        if (user.getStatus() != UserStatus.SUSPENDED) {
+            throw UserException.accountNotActive();
+        }
+
+        user.setStatus(UserStatus.ACTIVE);
+        User saved = userRepository.save(user);
+
+        log.info("User {} activated by admin {}", userId, adminUserId);
+        return mapToResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse closeUser(Long userId, Long adminUserId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserException.notFound(userId));
+
+        user.close();
+        User saved = userRepository.save(user);
+
+        log.info("User {} closed by admin {}", userId, adminUserId);
+        return mapToResponse(saved);
+    }
     private UserResponse mapToResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
