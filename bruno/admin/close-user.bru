@@ -1,0 +1,10 @@
+meta {
+  name: Close User Account
+  type: http
+  seq: 5
+}
+
+put {
+  url: {{baseUrl}}/api/v1/admin/users/3/close?adminUserId=1
+  auth: none
+}

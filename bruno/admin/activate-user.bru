@@ -1,0 +1,10 @@
+meta {
+  name: Activate User
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/v1/admin/users/3/activate?adminUserId=1
+  auth: none
+}

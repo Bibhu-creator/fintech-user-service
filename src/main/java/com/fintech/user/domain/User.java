@@ -94,6 +94,7 @@ public class User {
     }
 
     public void close() {
+
         this.status = UserStatus.CLOSED;
     }
 
